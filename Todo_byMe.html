@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo_List</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            overflow-x: hidden;
+        }
+        .Container {
+            background: #fff;
+            padding: 30px 70px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            margin-top: 20px;
+            backdrop-filter: 15px;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #764ba2;
+        }
+        #todo_input {
+            width: 90%;
+            padding: 20px;
+            margin-bottom: 20px;
+            margin-right: 20px;
+            border: 2px solid #764ba2;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        #todo_input:focus {
+            border-color: #667eea;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            color: #fff;
+        }
+        #Add_Button {
+            background-color: #667eea;
+        }
+        #Add_Button:hover {
+            background-color: #5a67d8;
+            transform: translateY(-2px);
+        }
+        #Delete_All {
+            background-color: #e53e3e;
+        }
+        #Delete_All:hover {
+            background-color: #c53030;
+            transform: translateY(-2px);
+        }
+        #todolist {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 60vh;
+            overflow-y: auto;
+            border-top: 2px solid #764ba2;
+        }
+        .todo_item {
+            background: #f7fafc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .todo_item:hover {
+            background-color: #edf2f7;
+            transform: translateY(-2px);
+        }
+        .todo_item span {
+            flex: 1;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .todo_item button {
+            background-color: #764ba2;
+            color: #fff;
+            margin-left: 5px;
+        }
+        .todo_item button:hover {
+            background-color: #6b46c1;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="Container">
+        <h1>Todo List</h1>
+        <input type="text" name="Enter Item" id="todo_input" placeholder="Add The Items - ">
+
+        <div>
+            <button id="Add_Button">Add Item</button>
+            <button id = "Delete_All">Delete All</button>
+            <!-- <button id = "Edit_Item">Edit Item</button> -->
+        </div>
+
+        <ol id="todolist" class="todo_class"></ol>
+    </div>
+    
+    <script>
+
+        function addTheItems(){
+            //two variables we need....
+            //first one is what to add
+            //second is what to add...
+            let todoInput = document.getElementById("todo_input"); //this is what to add...
+            let todoList = document.getElementById("todolist");
+
+            //now if value entered is not empty then we will add it
+            if(todoInput.value.trim() !== ""){
+                //trim is to remove extra space.....
+
+                //create element, add info, that it should have like 
+                let item  = document.createElement("li");
+                item.className = "todo_item";
+                // item.textContent = todoInput.value; //copying value to this elemnent from todoinput
+                item.draggable = true;
+
+
+                //Creating An element for string data, so that only it can be edited.....
+                let StringVal = document.createElement("span");
+                StringVal.textContent = todoInput.value;
+                // item.append(StringVal); //linking
+
+                StringVal.setAttribute("spellcheck", "true");//not an event....no action listener reqd
+
+                //now creating delte button               
+                let delteButton = document.createElement("button");//creating
+                delteButton.textContent = "Delete";//defing  
+                delteButton.addEventListener("click", function(){
+                    item.remove();
+                });
+                // item.appendChild(delteButton);//linking
+
+
+                //making editing button for each element passed...
+                let editButton = document.createElement("button");//creating
+                editButton.textContent = "Edit";
+                editButton.addEventListener("click", function(){
+                    StringVal.setAttribute("contenteditable", "true");
+                    StringVal.focus(); //when it will loss focus, it will be saved by blur
+                })
+                item.append(StringVal); //linking
+                item.appendChild(editButton);//linking
+                item.appendChild(delteButton);//linking
+
+                
+
+                //Saving the edited element
+                //event is out of focus to activate blur
+                StringVal.addEventListener("blur", function(){//triggered when element loses it focus (clicking outside the area)
+                    StringVal.setAttribute("contenteditable", "false");
+                })
+
+                todoList.appendChild(item);
+
+
+                //DRAG AND DROP
+                todoInput.value = "";
+
+                item.addEventListener("dragstart", function(){ //it trigger when starts dragging
+                    item.classList.add("dragging");//add a class list dragging
+                });
+
+                item.addEventListener("dragend", function(){//after stopiing dragging
+                    item.classList.remove("dragging")//remove class
+                });
+
+                item.addEventListener("dragover", function(e){
+                    e.preventDefault();
+                });
+
+                //now shuffling of other element while drag and drop.....
+                item.addEventListener("dragenter", function(e){
+                    let dragItem = document.querySelector(".dragging");//since only element at a time can be dragged
+                    if(dragItem!==item){
+                        //shouldnt be a same item.....
+                        todoList.insertBefore(dragItem, item);
+                    }
+
+                });            
+
+            }
+            else{
+                //you pass empty...
+                alert("Empty String!");
+            }
+        }
+       
+       
+        document.getElementById("Add_Button").addEventListener("click", addTheItems);
+
+
+        //delete for all
+        document.getElementById("Delete_All").addEventListener("click", function(){
+            let WholeList = document.getElementById("todolist");//deleteing all from the point of storage.
+            WholeList.innerHTML="";
+        });
+
+        document.getElementById("todo_input").addEventListener("keypress", function(event){
+            if (event.key === "Enter"){
+                event.preventDefault();
+                addTheItems();
+            }
+        });
+
+    </script>
+</body>
+</html>
